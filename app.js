@@ -33,8 +33,6 @@ var budgetController = (function() {
   return {
     addItem: function(type, description, value) {
       var newItem, ID;
-      console.log(type);
-      console.log(data.allItems);
       if (data.allItems[type].length > 0) {
         //take the last id and add 1
         ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
@@ -49,10 +47,6 @@ var budgetController = (function() {
       }
       data.allItems[type].push(newItem);
       return newItem;
-    },
-    //TODO REMOVE this function
-    testing: function() {
-      console.log(data);
     }
   };
 })();
