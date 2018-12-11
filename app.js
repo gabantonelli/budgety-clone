@@ -37,7 +37,7 @@ var UIController = (function() {
 var controller = (function(budgetCtrl, UICtrl) {
   //creo una funzione per raggruppare insieme tutti gli event listeners che creerò
   var setupEventListeners = function() {
-    var DOMstrings = UICtrl.getDOMstrings;
+    var DOMstrings = UICtrl.getDOMstrings();
 
     document
       .querySelector(DOMstrings.inputBtn)
