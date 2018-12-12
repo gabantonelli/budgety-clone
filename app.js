@@ -27,7 +27,17 @@ var budgetController = (function() {
     totals: {
       exp: 0,
       inc: 0
-    }
+    },
+    budget: 0,
+    percentage: -1
+  };
+
+  var calculateTotal = function(type) {
+    var total = 0;
+    data.allItems[type].forEach(function(cur) {
+      total += cur.value;
+    });
+    data.totals[type] = total;
   };
 
   return {
@@ -47,6 +57,29 @@ var budgetController = (function() {
       }
       data.allItems[type].push(newItem);
       return newItem;
+    },
+
+    calculateBudget: function() {
+      // calculate total of income and expenses
+      calculateTotal("exp");
+      calculateTotal("inc");
+      // calculate budget income - expenses
+      data.budget = data.totals.inc - data.totals.exp;
+      // calculate the percentage of income we spent
+      if (data.totals.inc > 0) {
+        data.percentage = Math.round((data.totals.exp / data.totals.inc) * 100);
+      } else {
+        data.percentage = -1;
+      }
+    },
+
+    getBudget: function() {
+      return {
+        budget: data.budget,
+        totalInc: data.totals.inc,
+        totalExp: data.totals.exp,
+        percentage: data.percentage
+      };
     }
   };
 })();
@@ -138,6 +171,14 @@ var controller = (function(budgetCtrl, UICtrl) {
     });
   };
 
+  var updateBudget = function() {
+    // 1. calculate the budget
+    budgetCtrl.calculateBudget();
+    // 2. return the budget
+    var budget = budgetCtrl.getBudget();
+    // 3. update budget on UI
+  };
+
   var ctrlAddItem = function() {
     var input, newItem;
 
@@ -153,6 +194,8 @@ var controller = (function(budgetCtrl, UICtrl) {
       UICtrl.clearFields();
       // 5. calculate/update budget
     }
+
+    updateBudget();
   };
 
   return {
