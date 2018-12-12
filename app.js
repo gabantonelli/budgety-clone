@@ -93,6 +93,23 @@ var UIController = (function() {
       // insert the html into the DOM
       document.querySelector(element).insertAdjacentHTML("beforeend", newHtml);
     },
+    // method to delete the input fields for example after submitting
+    clearFields: function() {
+      var fields, fieldsArr;
+
+      fields = document.querySelectorAll(
+        DOMstrings.inputDescription + "," + DOMstrings.inputValue
+      );
+      //querySelectorAll doesn't return an array, but a list. We need to covert to array
+      fieldsArr = Array.prototype.slice.call(fields);
+
+      fieldsArr.forEach(function(element, index, array) {
+        element.value = "";
+      });
+
+      //focus on the first input
+      fieldsArr[0].focus();
+    },
 
     getDOMstrings: function() {
       return DOMstrings;
@@ -130,8 +147,11 @@ var controller = (function(budgetCtrl, UICtrl) {
     newItem = budgetCtrl.addItem(input.type, input.description, input.value);
     // 3. add item to UI
     UICtrl.addListItem(newItem, input.type);
-    // 4. calculate budget
-    // 5. display the budget
+    // 4. clear input fields
+    UICtrl.clearFields();
+    // 5. calculate budget
+
+    // 6. display the budget
   };
 
   return {
