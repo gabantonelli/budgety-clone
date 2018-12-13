@@ -59,6 +59,20 @@ var budgetController = (function() {
       return newItem;
     },
 
+    deleteItem: function(type, id) {
+      var arrIds, indexToDelete;
+      // map works like foreach but it creates a new array
+      // in this case i want to create an array with all the ids
+      arrIds = data.allItems[type].map(function(cur) {
+        return cur.id;
+      });
+      indexToDelete = arrIds.indexOf(id);
+
+      if (indexToDelete >= 0) {
+        data.allItems[type].splice(indexToDelete, 1);
+      }
+    },
+
     calculateBudget: function() {
       // calculate total of income and expenses
       calculateTotal("exp");
@@ -96,7 +110,8 @@ var UIController = (function() {
     budgetLabel: ".budget__value",
     incomeLabel: ".budget__income--value",
     expensesLabel: ".budget__expenses--value",
-    percentageLabel: ".budget__expenses--percentage"
+    percentageLabel: ".budget__expenses--percentage",
+    container: ".container"
   };
 
   return {
@@ -115,11 +130,11 @@ var UIController = (function() {
       if (type === "inc") {
         element = DOMstrings.incomeContainer;
         html =
-          '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+          '<div class="item clearfix" id="inc-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
       } else if (type === "exp") {
         element = DOMstrings.expensesContainer;
         html =
-          '<div class="item clearfix" id="expense-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
+          '<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>';
       }
 
       // replace the placeholder text with our data
@@ -130,6 +145,12 @@ var UIController = (function() {
       // insert the html into the DOM
       document.querySelector(element).insertAdjacentHTML("beforeend", newHtml);
     },
+
+    deleteListItem: function(selectorId) {
+      var el = document.getElementById(selectorId);
+      el.parentNode.removeChild(el);
+    },
+
     // method to delete the input fields for example after submitting
     clearFields: function() {
       var fields, fieldsArr;
@@ -186,6 +207,10 @@ var controller = (function(budgetCtrl, UICtrl) {
         ctrlAddItem();
       }
     });
+
+    document
+      .querySelector(DOMstrings.container)
+      .addEventListener("click", ctrlDeleteItem);
   };
 
   var updateBudget = function() {
@@ -214,6 +239,29 @@ var controller = (function(budgetCtrl, UICtrl) {
     }
 
     updateBudget();
+  };
+
+  var ctrlDeleteItem = function(e) {
+    function findParent(el, className) {
+      while ((el = el.parentElement) && !el.classList.contains(className));
+      return el;
+    }
+    var itemID;
+    itemDelete = findParent(event.target, "item__delete");
+    if (itemDelete) itemID = itemDelete.parentNode.parentNode.id;
+
+    if (itemID) {
+      var splitID, type, id;
+      splitID = itemID.split("-");
+      type = splitID[0];
+      id = parseInt(splitID[1]);
+      // delete the item from data in budgetctrl
+      budgetCtrl.deleteItem(type, id);
+      // delete the item from UI
+      UICtrl.deleteListItem(itemID);
+      // 3. update the budget and display the new one
+      updateBudget();
+    }
   };
 
   return {
